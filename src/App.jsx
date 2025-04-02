@@ -20,56 +20,82 @@ function App() {
 
     setIsMatch(false);
 
-    // 使用 diff 函式庫比對每行文字
-    const differences = Diff.diffLines(text1, text2);
+    // 將文字分行處理
+    const lines1 = text1.split('\n');
+    const lines2 = text2.split('\n');
 
-    // 標註行數和差異
-    const processedDiff = [];
-    let line1Counter = 0;
-    let line2Counter = 0;
+    // 儲存每行比對結果
+    const processedDiff = {
+      text1Diff: [],
+      text2Diff: [],
+    };
 
-    differences.forEach((part) => {
-      if (part.added) {
-        // 在第二段文字中添加的行
-        const lines = part.value.split('\n').filter((line) => line !== '');
-        lines.forEach((line) => {
-          line2Counter++;
-          processedDiff.push({
-            type: 'added',
-            line: line2Counter,
-            value: line,
-            source: 2,
-          });
+    // 找出最大行數以確保所有行都被處理
+    const maxLines = Math.max(lines1.length, lines2.length);
+
+    for (let i = 0; i < maxLines; i++) {
+      const line1 = i < lines1.length ? lines1[i] : '';
+      const line2 = i < lines2.length ? lines2[i] : '';
+
+      // 如果兩行內容相同，不需要特別處理
+      if (line1 === line2) {
+        processedDiff.text1Diff.push({
+          line: i + 1,
+          content: [{ value: line1, isDiff: false }],
+          hasDiff: false,
         });
-        if (part.value.endsWith('\n')) line2Counter++;
-      } else if (part.removed) {
-        // 從第一段文字中刪除的行
-        const lines = part.value.split('\n').filter((line) => line !== '');
-        lines.forEach((line) => {
-          line1Counter++;
-          processedDiff.push({
-            type: 'removed',
-            line: line1Counter,
-            value: line,
-            source: 1,
-          });
+
+        processedDiff.text2Diff.push({
+          line: i + 1,
+          content: [{ value: line2, isDiff: false }],
+          hasDiff: false,
         });
-        if (part.value.endsWith('\n')) line1Counter++;
-      } else {
-        // 相同的行，不顯示
-        const lines = part.value.split('\n').filter((line) => line !== '');
-        lines.forEach(() => {
-          line1Counter++;
-          line2Counter++;
-        });
-        if (part.value.endsWith('\n')) {
-          line1Counter++;
-          line2Counter++;
-        }
+        continue;
       }
-    });
+
+      // 使用 diffWords 進行更精確的字詞比較
+      const differences = Diff.diffWords(line1, line2);
+
+      // 處理第一個文字的差異
+      const line1Content = [];
+      const line2Content = [];
+
+      differences.forEach((part) => {
+        if (part.added) {
+          // 這部分在第二個文字中新增
+          line2Content.push({ value: part.value, isDiff: true });
+        } else if (part.removed) {
+          // 這部分從第一個文字中刪除
+          line1Content.push({ value: part.value, isDiff: true });
+        } else {
+          // 相同的部分
+          line1Content.push({ value: part.value, isDiff: false });
+          line2Content.push({ value: part.value, isDiff: false });
+        }
+      });
+
+      processedDiff.text1Diff.push({
+        line: i + 1,
+        content: line1Content,
+        hasDiff: line1Content.some((part) => part.isDiff),
+      });
+
+      processedDiff.text2Diff.push({
+        line: i + 1,
+        content: line2Content,
+        hasDiff: line2Content.some((part) => part.isDiff),
+      });
+    }
 
     setDiffResult(processedDiff);
+  };
+
+  const renderDiffText = (content) => {
+    return content.map((part, index) => (
+      <span key={`part-${index}-${part.value.substring(0, 10)}`} className={part.isDiff ? 'text-danger fw-bold' : ''}>
+        {part.value}
+      </span>
+    ));
   };
 
   return (
@@ -119,39 +145,39 @@ function App() {
         <Card className='mb-4'>
           <Card.Header>比對結果</Card.Header>
           <Card.Body>
-            <div className='text-center fw-bold text-success'>match</div>
+            <div className='text-center fw-bold text-success'>完全相符</div>
           </Card.Body>
         </Card>
       )}
 
-      {diffResult && diffResult.length > 0 && (
+      {diffResult && (
         <Card className='mb-4'>
           <Card.Header>比對結果（只顯示差異部分）</Card.Header>
           <Card.Body>
             <Row>
               <Col md={6}>
                 <h5>原始文字差異</h5>
-                {diffResult
-                  .filter((part) => part.source === 1)
-                  .map((part) => (
-                    <div key={`removed-${part.line}-${part.value.substring(0, 10)}`} className='mb-1'>
+                {diffResult.text1Diff
+                  .filter((line) => line.hasDiff)
+                  .map((line, index) => (
+                    <div key={`text1-${line.line}-${index}`} className='mb-1'>
                       <Badge bg='secondary' className='me-2'>
-                        行 {part.line}
+                        行 {line.line}
                       </Badge>
-                      <span className='text-danger fw-bold text-decoration-line-through'>{part.value}</span>
+                      {renderDiffText(line.content)}
                     </div>
                   ))}
               </Col>
               <Col md={6}>
                 <h5>比較文字差異</h5>
-                {diffResult
-                  .filter((part) => part.source === 2)
-                  .map((part) => (
-                    <div key={`added-${part.line}-${part.value.substring(0, 10)}`} className='mb-1'>
+                {diffResult.text2Diff
+                  .filter((line) => line.hasDiff)
+                  .map((line, index) => (
+                    <div key={`text2-${line.line}-${index}`} className='mb-1'>
                       <Badge bg='secondary' className='me-2'>
-                        行 {part.line}
+                        行 {line.line}
                       </Badge>
-                      <span className='text-success fw-bold'>{part.value}</span>
+                      {renderDiffText(line.content)}
                     </div>
                   ))}
               </Col>
