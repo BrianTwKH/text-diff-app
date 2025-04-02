@@ -1,0 +1,111 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+}
+
+body {
+  background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  background: linear-gradient(to right, #11998e, #38ef7d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.form-control {
+  border: 2px solid #eee;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #11998e;
+  box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.25);
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #11998e, #38ef7d);
+  border: none;
+  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #0d8b82, #32dd72);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.text-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 3px;
+  padding: 2px 0;
+  animation: highlightGreen 1s ease;
+}
+
+.text-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 3px;
+  padding: 2px 0;
+  animation: highlightRed 1s ease;
+}
+
+@keyframes highlightGreen {
+  from {
+    background-color: rgba(40, 167, 69, 0.5);
+  }
+  to {
+    background-color: rgba(40, 167, 69, 0.1);
+  }
+}
+
+@keyframes highlightRed {
+  from {
+    background-color: rgba(220, 53, 69, 0.5);
+  }
+  to {
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+}
